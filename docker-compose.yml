@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: yoonema
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: yoonena
+      MYSQL_PASSWORD: secret
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: yoonema
+      DB_USERNAME: yoonena
+      DB_PASSWORD: secret
+    volumes:
+      - ./backend:/app:delegated
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app:delegated
+    ports:
+      - "5175:80"
+
+volumes:
+  db_data:
