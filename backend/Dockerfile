@@ -19,4 +19,6 @@ RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache || true
 
 EXPOSE 8000
 
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
+# Use the platform-provided $PORT if present (Railway sets $PORT).
+# Fall back to 8000 when $PORT is not set (local/dev).
+CMD ["sh", "-lc", "php -S 0.0.0.0:${PORT:-8000} -t public"]
