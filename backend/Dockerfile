@@ -17,6 +17,12 @@ COPY . .
 
 RUN composer run-script post-autoload-dump
 
+# Generate .env file from .env.example if it doesn't exist
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# Generate APP_KEY if not already set
+RUN php artisan key:generate --force
+
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache || true
 
 EXPOSE 8000
