@@ -57,36 +57,7 @@ Route::prefix('v1')->group(function () {
             Route::post('reviews', [ReviewController::class, 'store']);
         });
 
-        Route::middleware(['role:etudiant'])->prefix('etudiant')->group(function () {
-            Route::get('restaurants', [StudentRestaurantController::class, 'index']);
-            Route::get('restaurants/{restaurant}', [StudentRestaurantController::class, 'show']);
-            Route::get('restaurants/{restaurant}/menu', [StudentRestaurantController::class, 'menu']);
-            Route::get('delivery-persons', [StudentRestaurantController::class, 'availableDeliveryPersons']);
-            Route::post('orders', [StudentOrderController::class, 'store'])->middleware(['throttle:3,1', 'order.limits']);
-            Route::get('orders', [StudentOrderController::class, 'index']);
-            Route::get('orders/{order}', [StudentOrderController::class, 'show']);
-            Route::post('orders/{order}/cancel', [StudentOrderController::class, 'cancel']);
-            Route::post('orders/{order}/initiate-payment', [PaymentController::class, 'initiate']);
-            Route::get('orders/{order}/payment-status', [PaymentController::class, 'status']);
-            Route::post('reviews', [ReviewController::class, 'store']);
-        });
-
         Route::middleware(['role:vendor'])->prefix('vendor')->group(function () {
-            Route::get('restaurant', [VendorRestaurantController::class, 'show']);
-            Route::put('restaurant', [VendorRestaurantController::class, 'update']);
-            Route::get('menu', [MenuController::class, 'index']);
-            Route::post('menu', [MenuController::class, 'store']);
-            Route::put('menu/{menuItem}', [MenuController::class, 'update']);
-            Route::delete('menu/{menuItem}', [MenuController::class, 'destroy']);
-            Route::get('orders', [VendorOrderController::class, 'index']);
-            Route::put('orders/{order}/status', [VendorOrderController::class, 'updateStatus']);
-            Route::post('orders/{order}/refuse', [VendorOrderController::class, 'refuse']);
-            Route::get('stats', [VendorOrderController::class, 'stats']);
-            Route::get('payments', [VendorOrderController::class, 'stats']);
-        });
-
-        Route::middleware(['role:vendeur'])->prefix('vendeur')->group(
-            function () {
             Route::get('restaurant', [VendorRestaurantController::class, 'show']);
             Route::put('restaurant', [VendorRestaurantController::class, 'update']);
             Route::get('menu', [MenuController::class, 'index']);
@@ -103,19 +74,7 @@ Route::prefix('v1')->group(function () {
         Route::middleware(['role:delivery'])->prefix('delivery')->group(function () {
             Route::get('orders', [DeliveryController::class, 'available']);
             Route::post('orders/{order}/accept', [DeliveryController::class, 'accept']);
-            Route::put('orders/{order}/accept', [DeliveryController::class, 'accept']);
             Route::post('orders/{order}/delivered', [DeliveryController::class, 'delivered']);
-            Route::put('orders/{order}/delivered', [DeliveryController::class, 'delivered']);
-            Route::get('history', [DeliveryController::class, 'history']);
-            Route::put('availability', [DeliveryController::class, 'availability']);
-        });
-
-        Route::middleware(['role:livreur'])->prefix('livreur')->group(function () {
-            Route::get('orders', [DeliveryController::class, 'available']);
-            Route::post('orders/{order}/accept', [DeliveryController::class, 'accept']);
-            Route::put('orders/{order}/accept', [DeliveryController::class, 'accept']);
-            Route::post('orders/{order}/delivered', [DeliveryController::class, 'delivered']);
-            Route::put('orders/{order}/delivered', [DeliveryController::class, 'delivered']);
             Route::get('history', [DeliveryController::class, 'history']);
             Route::put('availability', [DeliveryController::class, 'availability']);
         });

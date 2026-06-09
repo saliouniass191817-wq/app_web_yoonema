@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { MenuItemCard } from '../../components/shared/MenuItemCard';
 import { Button } from '../../components/ui/Button';
-import { CardSkeleton } from '../../components/ui/Skeleton';
+import { Icon } from '../../components/ui/Icon';
+import { FoodTile } from '../../components/ui/FoodTile';
 import { useCart } from '../../hooks/useCart';
 import { useNotifications } from '../../hooks/useNotifications';
 import { restaurantAPI } from '../../api';
@@ -18,17 +19,12 @@ export default function RestaurantDetailPage() {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, [id]);
+  useEffect(() => { loadData(); }, [id]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const [restaurantRes, menuRes] = await Promise.all([
-        restaurantAPI.getById(id),
-        restaurantAPI.getMenu(id),
-      ]);
+      const [restaurantRes, menuRes] = await Promise.all([restaurantAPI.getById(id), restaurantAPI.getMenu(id)]);
       setRestaurantData(restaurantRes.data);
       setMenu(menuRes.data || []);
       setRestaurant(id);
@@ -44,83 +40,61 @@ export default function RestaurantDetailPage() {
     success(`${item.name} ajouté au panier`);
   };
 
-  if (loading) {
+  if (loading || !restaurant) {
     return (
       <AppLayout>
-        <div className="max-w-7xl mx-auto p-4 md:p-6">
-          <CardSkeleton />
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: 16 }}>
+          <div className="card" style={{ height: 248 }} />
+          <div className="card" style={{ height: 132, marginTop: 14 }} />
         </div>
       </AppLayout>
     );
   }
 
-  if (!restaurant) {
-    return (
-      <AppLayout>
-        <div className="max-w-7xl mx-auto p-4 md:p-6 text-center">
-          <p className="text-2xl">Restaurant non trouvé</p>
-          <Button onClick={() => navigate('/home')} className="mt-4">
-            Retour à l'accueil
-          </Button>
-        </div>
-      </AppLayout>
-    );
-  }
+  const open = restaurant.is_open;
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
-        {/* Restaurant Header */}
-        <div className="mb-8">
-          <img
-            src={restaurant.cover_url || '/images/placeholder-food.jpg'}
-            alt={restaurant.name}
-            className="w-full h-48 md:h-64 object-cover rounded-2xl mb-6"
-          />
-
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
-              <p className="text-gray-600 max-w-2xl">{restaurant.description}</p>
+      <div style={{ maxWidth: 760, margin: '0 auto' }}>
+        {/* Hero */}
+        <div className="rd-header">
+          <FoodTile src={restaurant.cover_url || restaurant.image_url} seed={restaurant.name} />
+          <div className="rd-overlay" />
+          <button className="rd-back" onClick={() => navigate('/home')}><Icon name="chevronLeft" size={20} /></button>
+          <button className="rd-fav"><Icon name="heart" size={19} /></button>
+          <div className="rd-title-wrap">
+            <span className={`pill-status ${open ? 'pill-open' : 'pill-closed'}`} style={{ position: 'static', display: 'inline-flex', marginBottom: 10 }}>
+              <span className="dot" />{open ? 'Ouvert' : 'Fermé'}
+            </span>
+            <h2 className="rd-title">{restaurant.name}</h2>
+            <div className="rd-meta">
+              <span className="mi"><Icon name="star" size={14} style={{ color: 'var(--gold)' }} />{Number(restaurant.rating || 4.5).toFixed(1)}</span>
+              <span className="mi"><Icon name="clock" size={14} />{restaurant.delivery_time} min</span>
+              <span className="mi"><Icon name="bike" size={14} />{Number(restaurant.delivery_fee || 0) === 0 ? 'Gratuit' : `${restaurant.delivery_fee} FCFA`}</span>
+              {restaurant.address && <span className="mi"><Icon name="mapPin" size={14} />{restaurant.address}</span>}
             </div>
-            <div className="text-center">
-              <p className="text-3xl">★ {restaurant.rating || 4.5}</p>
-              <p className="text-gray-600 text-sm">Note</p>
-            </div>
-          </div>
-
-          <div className="flex gap-4 text-sm text-gray-600">
-            <span>⏱️ {restaurant.delivery_time} min</span>
-            <span>🚚 {restaurant.delivery_fee} FCFA</span>
-            <span>📍 {restaurant.address}</span>
           </div>
         </div>
 
         {/* Menu */}
-        <h2 className="text-2xl font-bold mb-6">Menu</h2>
+        <div style={{ padding: '20px 16px 8px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700 }}>Au menu</h3>
+          <span style={{ fontSize: 13, color: 'var(--ink-3)', fontWeight: 600 }}>{menu.length} plat{menu.length > 1 ? 's' : ''}</span>
+        </div>
+
         {menu.length === 0 ? (
-          <div className="text-center py-12 text-gray-600">
-            <p>Aucun article disponible</p>
+          <div style={{ margin: '4px 16px 24px', padding: '40px 16px', textAlign: 'center', color: 'var(--ink-3)', border: '2px dashed var(--hairline)', borderRadius: 18 }}>
+            Aucun article disponible pour le moment.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {menu.map((item) => (
-              <MenuItemCard
-                key={item.id}
-                item={item}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
+          <div style={{ padding: '4px 16px 28px', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 13 }}>
+            {menu.map((item) => <MenuItemCard key={item.id} item={item} onAddToCart={handleAddToCart} />)}
           </div>
         )}
 
-        {/* Back Button */}
-        <div className="mt-8">
-          <Button
-            variant="outline"
-            onClick={() => navigate('/home')}
-          >
-            ← Retour
+        <div style={{ padding: '0 16px 16px' }}>
+          <Button variant="ghost" onClick={() => navigate('/home')}>
+            <Icon name="chevronLeft" size={18} />Retour aux restaurants
           </Button>
         </div>
       </div>

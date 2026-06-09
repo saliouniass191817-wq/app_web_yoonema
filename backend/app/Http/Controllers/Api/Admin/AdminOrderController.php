@@ -15,6 +15,7 @@ class AdminOrderController extends Controller
         $orders = Order::with(['student', 'restaurant', 'deliveryPerson'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
             ->orderBy('created_at', 'desc')
+            ->limit((int) config('yoonema.list_limit', 200))
             ->get();
 
         return response()->json(['success' => true, 'data' => OrderResource::collection($orders), 'message' => 'Commandes récupérées.']);

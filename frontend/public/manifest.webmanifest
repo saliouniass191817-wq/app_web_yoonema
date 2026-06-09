@@ -1,0 +1,20 @@
+{
+  "name": "Yoonema - Livraison de repas",
+  "short_name": "Yoonema",
+  "description": "Livraison de repas pour etudiants universitaires.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8F9FA",
+  "theme_color": "#FF6B35",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ]
+}

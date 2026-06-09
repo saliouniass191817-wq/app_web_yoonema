@@ -1,47 +1,32 @@
-import { useNotificationStore } from '../store';
+import { useNotificationStore } from '../store/notificationStore';
 import { useCallback } from 'react';
 
 export function useNotifications() {
-  const { notifications, addNotification, removeNotification, clear } =
-    useNotificationStore();
+  const { toasts = [], pushToast, removeToast, reset } = useNotificationStore();
 
   const notify = useCallback((message, type = 'info', duration = 3000) => {
-    const id = addNotification({ message, type });
+    const id = pushToast(message, type);
 
     if (duration > 0) {
       setTimeout(() => {
-        removeNotification(id);
+        removeToast(id);
       }, duration);
     }
 
     return id;
-  }, [addNotification, removeNotification]);
+  }, [pushToast, removeToast]);
 
-  const success = useCallback(
-    (message, duration = 3000) =>
-      notify(message, 'success', duration),
-    [notify]
-  );
-
-  const error = useCallback(
-    (message, duration = 5000) =>
-      notify(message, 'error', duration),
-    [notify]
-  );
-
-  const warning = useCallback(
-    (message, duration = 4000) =>
-      notify(message, 'warning', duration),
-    [notify]
-  );
+  const success = useCallback((message, duration = 3000) => notify(message, 'success', duration), [notify]);
+  const error = useCallback((message, duration = 5000) => notify(message, 'error', duration), [notify]);
+  const warning = useCallback((message, duration = 4000) => notify(message, 'warning', duration), [notify]);
 
   return {
-    notifications,
+    notifications: toasts,
     notify,
     success,
     error,
     warning,
-    removeNotification,
-    clear,
+    removeNotification: removeToast,
+    clear: reset,
   };
 }

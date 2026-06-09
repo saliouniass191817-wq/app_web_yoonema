@@ -1,9 +1,11 @@
+export function fcfa(amount) {
+  const n = Number(amount || 0).toLocaleString('fr-FR');
+  // Normalize any whitespace separator (incl. narrow/no-break space) to a regular space.
+  return n.replace(/\s/g, ' ') + ' FCFA';
+}
+
 export function formatCurrency(amount) {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XOF',
-    minimumFractionDigits: 0,
-  }).format(amount);
+  return fcfa(amount);
 }
 
 export function formatDate(date) {

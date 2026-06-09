@@ -13,6 +13,7 @@ class AdminUserController extends Controller
     {
         $users = User::when($request->filled('role'), fn ($query) => $query->where('role', $request->input('role')))
             ->orderBy('created_at', 'desc')
+            ->limit((int) config('yoonema.list_limit', 200))
             ->get();
 
         return response()->json(['success' => true, 'data' => $users, 'message' => 'Utilisateurs récupérés.']);

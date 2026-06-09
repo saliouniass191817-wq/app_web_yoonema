@@ -9,4 +9,5 @@ return [
     'max_active_orders' => env('YOONEMA_MAX_ACTIVE_ORDERS', 2),
     'max_orders_per_day' => env('YOONEMA_MAX_ORDERS_PER_DAY', 10),
     'order_cooldown_minutes' => env('YOONEMA_ORDER_COOLDOWN_MINUTES', 2),
+    'list_limit' => env('YOONEMA_LIST_LIMIT', 200),
 ];

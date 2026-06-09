@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
-import { Card, CardBody } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Icon } from '../../components/ui/Icon';
 import { authAPI } from '../../api';
 import { useAuthStore } from '../../store';
 
@@ -17,54 +18,63 @@ const initialForm = {
 const senegalPhoneRegex = /^(?:\+221|00221)?\s?(7[05678])\s?\d{3}\s?\d{2}\s?\d{2}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const ROLES = [
+  { key: 'student', title: 'Étudiant', subtitle: 'Commander des repas', icon: 'bag', color: 'var(--terra)' },
+  { key: 'vendor', title: 'Vendeur / Restaurant', subtitle: 'Gérer mon restaurant', icon: 'store', color: 'var(--forest)' },
+  { key: 'delivery', title: 'Livreur', subtitle: 'Livrer des commandes', icon: 'bike', color: 'var(--indigo)' },
+];
+
+function Brand() {
+  return (
+    <div className="brand-logo" style={{ color: 'var(--ink)', marginBottom: 22 }}>
+      <span className="mark" style={{ background: 'var(--terra)', boxShadow: 'var(--shadow-terra)', color: '#fff' }}>
+        <Icon name="utensils" size={22} />
+      </span>
+      Yoonema
+    </div>
+  );
+}
+
+const wrapStyle = { minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24 };
+const cardStyle = { width: '100%', maxWidth: 440, padding: '32px 30px' };
+
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
 
-  if (role === 'student') {
-    return <RegisterForm title="Inscription Étudiant" role="student" onBack={() => setRole(null)} />;
-  }
-  if (role === 'vendor') {
-    return <RegisterForm title="Inscription Vendeur" role="vendor" onBack={() => setRole(null)} />;
-  }
-  if (role === 'delivery') {
-    return <RegisterForm title="Inscription Livreur" role="delivery" onBack={() => setRole(null)} />;
+  if (role) {
+    const titles = { student: 'Inscription étudiant', vendor: 'Inscription vendeur', delivery: 'Inscription livreur' };
+    return <RegisterForm title={titles[role]} role={role} onBack={() => setRole(null)} />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-orange-500">Yoonema</h1>
-          <p className="text-gray-600 mt-2">Choisissez votre rôle</p>
-        </div>
+    <div style={wrapStyle}>
+      <div className="card grain" style={cardStyle}>
+        <Brand />
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--ink)' }}>Créer un compte</h1>
+        <p style={{ color: 'var(--ink-2)', marginTop: 6, fontSize: 15 }}>Choisis ton rôle pour commencer.</p>
 
-        <div className="space-y-3">
-          {[
-            { key: 'student', title: 'Étudiant', subtitle: 'Commander des repas', icon: '🎓' },
-            { key: 'vendor', title: 'Vendeur/Restaurant', subtitle: 'Gérer mon restaurant', icon: '🍴' },
-            { key: 'delivery', title: 'Livreur', subtitle: 'Livrer des commandes', icon: '🚴' },
-          ].map((item) => (
-            <Card key={item.key} onClick={() => setRole(item.key)} className="cursor-pointer hover:shadow-lg transition-all">
-              <CardBody className="py-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">{item.title}</h3>
-                    <p className="text-gray-600 text-sm">{item.subtitle}</p>
-                  </div>
-                  <span className="text-3xl">{item.icon}</span>
-                </div>
-              </CardBody>
-            </Card>
+        <div style={{ marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {ROLES.map((item) => (
+            <button key={item.key} className="quick" onClick={() => setRole(item.key)} style={{ padding: 14 }}>
+              <span className="qi" style={{ background: item.color, width: 42, height: 42, borderRadius: 12 }}>
+                <Icon name={item.icon} size={20} />
+              </span>
+              <span className="qmeta" style={{ flex: 1 }}>
+                <b style={{ fontSize: 15 }}>{item.title}</b>
+                <small>{item.subtitle}</small>
+              </span>
+              <Icon name="chevronRight" size={18} style={{ color: 'var(--ink-3)' }} />
+            </button>
           ))}
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-600">Vous avez déjà un compte ?</p>
-          <Button variant="ghost" onClick={() => navigate('/login')} className="mt-2">
+        <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--ink-2)', marginTop: 22 }}>
+          Déjà un compte ?{' '}
+          <button onClick={() => navigate('/login')} style={{ color: 'var(--terra)', fontWeight: 700, background: 'none', border: 'none' }}>
             Se connecter
-          </Button>
-        </div>
+          </button>
+        </p>
       </div>
     </div>
   );
@@ -97,7 +107,7 @@ function RegisterForm({ title, role, onBack }) {
     if (!formData.name.trim()) nextErrors.name = 'Le nom est obligatoire.';
     if (!emailRegex.test(formData.email)) nextErrors.email = 'Adresse email invalide.';
     if (!senegalPhoneRegex.test(formData.phone)) nextErrors.phone = 'Numéro sénégalais invalide.';
-    if (formData.password.length < 8) nextErrors.password = 'Le mot de passe doit contenir au moins 8 caractères.';
+    if (formData.password.length < 8) nextErrors.password = 'Au moins 8 caractères.';
     if (formData.password !== formData.password_confirmation) nextErrors.password_confirmation = 'Les mots de passe ne correspondent pas.';
     return nextErrors;
   };
@@ -159,57 +169,52 @@ function RegisterForm({ title, role, onBack }) {
   };
 
   const strengthLabels = ['Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
+  const strengthColor = ['var(--clay)', 'var(--clay)', 'var(--gold)', 'var(--forest)', 'var(--forest)'][passwordStrength];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center p-4 py-8">
-      <div className="w-full max-w-md">
-        <Card>
-          <CardBody>
-            <button type="button" onClick={onBack} className="mb-4 text-sm font-medium text-orange-600">
-              Retour
-            </button>
-            <h2 className="text-2xl font-bold mb-6">{title}</h2>
+    <div style={{ ...wrapStyle, padding: '40px 24px' }}>
+      <div className="card grain" style={cardStyle}>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: 'var(--ink-2)', background: 'none', border: 'none', marginBottom: 14 }}
+        >
+          <Icon name="chevronRight" size={16} style={{ transform: 'rotate(180deg)' }} />
+          Changer de rôle
+        </button>
 
-            {errors.general && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
-                {errors.general}
+        <Brand />
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--ink)' }}>{title}</h2>
+
+        {errors.general && (
+          <div style={{ marginTop: 14, padding: '10px 12px', borderRadius: 12, background: 'var(--clay-tint)', color: 'var(--clay)', fontSize: 13, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Icon name="x" size={16} />{errors.general}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ marginTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <Input label="Nom complet" name="name" value={formData.name} onChange={handleChange} error={errors.name} placeholder="Awa Traoré" />
+          <Input label="Email" type="email" name="email" value={formData.email} onChange={handleChange} error={errors.email} placeholder="toi@univ.sn" />
+          <Input label="Téléphone" type="tel" name="phone" value={formData.phone} onChange={handleChange} error={errors.phone} placeholder="77 123 45 67" />
+          <Input label="Adresse (optionnel)" name="address" value={formData.address} onChange={handleChange} error={errors.address} placeholder="Village H, chambre 12" />
+          <Input label="Mot de passe" type="password" name="password" value={formData.password} onChange={handleChange} error={errors.password} placeholder="••••••••" />
+
+          {formData.password && (
+            <div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                {[0, 1, 2, 3].map((i) => (
+                  <span key={i} style={{ height: 6, flex: 1, borderRadius: 999, background: i < passwordStrength ? strengthColor : 'var(--hairline)' }} />
+                ))}
               </div>
-            )}
+              <p style={{ marginTop: 6, fontSize: 12, color: 'var(--ink-3)' }}>Sécurité : {strengthLabels[passwordStrength]}</p>
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <Field label="Nom complet *" name="name" value={formData.name} onChange={handleChange} error={errors.name} />
-              <Field label="Email *" type="email" name="email" value={formData.email} onChange={handleChange} error={errors.email} />
-              <Field label="Téléphone *" type="tel" name="phone" value={formData.phone} onChange={handleChange} error={errors.phone} placeholder="77 123 45 67" />
-              <Field label="Adresse" name="address" value={formData.address} onChange={handleChange} error={errors.address} />
-              <Field label="Mot de passe *" type="password" name="password" value={formData.password} onChange={handleChange} error={errors.password} />
-              <div>
-                <div className="h-2 rounded-full bg-gray-200">
-                  <div className="h-full rounded-full bg-orange-500 transition-all" style={{ width: `${(passwordStrength / 4) * 100}%` }} />
-                </div>
-                <p className="mt-1 text-xs text-gray-600">Sécurité: {strengthLabels[passwordStrength]}</p>
-              </div>
-              <Field label="Confirmer le mot de passe *" type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleChange} error={errors.password_confirmation} />
+          <Input label="Confirmer le mot de passe" type="password" name="password_confirmation" value={formData.password_confirmation} onChange={handleChange} error={errors.password_confirmation} placeholder="••••••••" />
 
-              <Button type="submit" loading={loading} className="w-full">
-                S’inscrire
-              </Button>
-            </form>
-          </CardBody>
-        </Card>
+          <Button type="submit" loading={loading} size="lg" className="w-full">Créer mon compte</Button>
+        </form>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, error, ...props }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium mb-2">{label}</label>
-      <input
-        {...props}
-        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 ${error ? 'border-red-400' : 'border-gray-300'}`}
-      />
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
     </div>
   );
 }

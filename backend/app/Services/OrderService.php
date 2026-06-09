@@ -59,14 +59,6 @@ class OrderService
         });
     }
 
-    public function updateStatus(Order $order, string $status): Order
-    {
-        $order->status = $status;
-        $order->save();
-
-        return $order;
-    }
-
     public function notifyUser(string $userId, string $title, string $body, ?string $orderId = null): Notification
     {
         return (new NotificationService())->notifyUser($userId, $title, $body, $orderId);

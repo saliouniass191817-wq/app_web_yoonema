@@ -183,18 +183,20 @@ Admin:     admin@test.com       / password123
 
 ## 📱 PWA - Progressive Web App
 
-L'application est totalement compatible PWA:
-- ✅ Installable sur mobile et desktop
-- ✅ Fonctionne hors ligne (avec Service Worker)
-- ✅ Synchronisation en arrière-plan
-- ✅ Notifications push
-- ✅ Mode plein écran
-- ✅ Icones multirésolution
+État actuel (installable, base fonctionnelle):
+- ✅ Manifest web (`public/manifest.webmanifest`) + `theme-color`
+- ✅ Service Worker (`public/sw.js`) enregistré au démarrage
+- ✅ Page hors-ligne (`public/offline.html`)
+- ✅ Installable sur mobile et desktop (prompt `InstallPrompt`)
+- ⚠️ Icône unique SVG (`public/icon.svg`) — pour une qualité "store",
+  ajouter de vraies icônes PNG 192x192 et 512x512 et les référencer
+  dans le manifest. Idéalement migrer vers `vite-plugin-pwa` pour la
+  génération du Service Worker et le precaching automatique.
 
 ### Configuration
-- `public/manifest.json` - Infos PWA
-- `public/icons/` - Icons 192x192, 512x512
-- Service Worker géré par Vite PWA plugin
+- `public/manifest.webmanifest` - Infos PWA (nom, couleurs, icônes)
+- `public/icon.svg` - Icône de l'app
+- `public/sw.js` - Service Worker (cache + offline), enregistré dans `App.jsx`
 
 ## 🔄 Flux en temps réel
 

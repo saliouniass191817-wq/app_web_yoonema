@@ -1,27 +1,25 @@
 import React from 'react';
+import { Icon } from './Icon';
 
-export function Input({
-  label,
-  error,
-  className = '',
-  type = 'text',
-  ...props
-}) {
+export function Input({ label, error, hint, icon, className = '', type = 'text', id, ...props }) {
+  const inputId = id || props.name || (label ? `in-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined);
+
   return (
-    <div className="w-full">
-      {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          {label}
-        </label>
+    <div className="field" style={{ marginTop: 0 }}>
+      {label && <label htmlFor={inputId}>{label}</label>}
+      <div className="inp" style={error ? { boxShadow: 'inset 0 0 0 2px var(--clay)' } : undefined}>
+        {icon && <span style={{ color: 'var(--ink-3)', display: 'inline-flex' }}>{icon}</span>}
+        <input id={inputId} type={type} className={className} {...props} />
+      </div>
+      {error && (
+        <p style={{ marginTop: 7, fontSize: 13, color: 'var(--clay)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Icon name="x" size={15} />
+          {error}
+        </p>
       )}
-      <input
-        type={type}
-        className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-all ${
-          error ? 'border-red-500 focus:ring-red-500' : ''
-        } ${className}`}
-        {...props}
-      />
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {!error && hint && <p style={{ marginTop: 7, fontSize: 13, color: 'var(--ink-3)' }}>{hint}</p>}
     </div>
   );
 }
+
+export default Input;

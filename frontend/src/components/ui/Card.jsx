@@ -1,9 +1,10 @@
 import React from 'react';
 
-export function Card({ children, className = '', ...props }) {
+export function Card({ children, className = '', interactive = false, style, ...props }) {
   return (
     <div
-      className={`bg-white rounded-2xl shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md ${className}`}
+      className={`card ${interactive ? 'transition-transform duration-300 ease-out-expo hover:-translate-y-1' : ''} ${className}`}
+      style={interactive ? { transition: 'transform .3s, box-shadow .3s', ...style } : style}
       {...props}
     >
       {children}
@@ -13,20 +14,22 @@ export function Card({ children, className = '', ...props }) {
 
 export function CardHeader({ children, className = '' }) {
   return (
-    <div className={`px-6 py-4 border-b border-gray-100 ${className}`}>
+    <div className={`px-5 py-4 md:px-6 ${className}`} style={{ borderBottom: '1px solid var(--hairline-2)' }}>
       {children}
     </div>
   );
 }
 
 export function CardBody({ children, className = '' }) {
-  return <div className={`px-6 py-4 ${className}`}>{children}</div>;
+  return <div className={`px-5 py-5 md:px-6 ${className}`}>{children}</div>;
 }
 
 export function CardFooter({ children, className = '' }) {
   return (
-    <div className={`px-6 py-4 border-t border-gray-100 ${className}`}>
+    <div className={`px-5 py-4 md:px-6 ${className}`} style={{ borderTop: '1px solid var(--hairline-2)' }}>
       {children}
     </div>
   );
 }
+
+export default Card;

@@ -1,20 +1,35 @@
 import React from 'react';
 
-export function Badge({ children, variant = 'default', className = '' }) {
-  const variants = {
-    default: 'bg-gray-200 text-gray-900',
-    success: 'bg-green-100 text-green-900',
-    error: 'bg-red-100 text-red-900',
-    warning: 'bg-yellow-100 text-yellow-900',
-    info: 'bg-blue-100 text-blue-900',
-    orange: 'bg-orange-100 text-orange-900',
-  };
+// Maps app variants onto Teranga status badge classes.
+const VARIANT_CLASS = {
+  success: 'badge-done',
+  warning: 'badge-pending',
+  info: 'badge-active',
+  error: 'badge-cancel',
+  danger: 'badge-cancel',
+  pending: 'badge-pending',
+  active: 'badge-active',
+  done: 'badge-done',
+  cancel: 'badge-cancel',
+};
+
+const NEUTRAL_STYLE = {
+  default: { background: 'var(--cream-2)', color: 'var(--ink-2)', borderColor: 'var(--hairline)' },
+  orange: { background: 'var(--terra-tint)', color: 'var(--terra-deep)', borderColor: 'var(--terra-soft)' },
+};
+
+export function Badge({ children, variant = 'default', dot = false, className = '' }) {
+  const teranga = VARIANT_CLASS[variant];
+  const style = teranga ? undefined : NEUTRAL_STYLE[variant] || NEUTRAL_STYLE.default;
+  const dotColor =
+    variant === 'orange' ? 'var(--terra)' : variant === 'default' ? 'var(--ink-3)' : undefined;
 
   return (
-    <span
-      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${variants[variant]} ${className}`}
-    >
+    <span className={`badge ${teranga || ''} ${className}`.trim()} style={style}>
+      {dot && <span className="dot" style={dotColor ? { background: dotColor } : undefined} />}
       {children}
     </span>
   );
 }
+
+export default Badge;

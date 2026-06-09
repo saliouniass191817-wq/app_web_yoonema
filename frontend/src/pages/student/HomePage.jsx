@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { RestaurantCard } from '../../components/shared/RestaurantCard';
-import { CardSkeleton } from '../../components/ui/Skeleton';
-import { Input } from '../../components/ui/Input';
+import { Chip } from '../../components/ui/Chip';
+import { Icon } from '../../components/ui/Icon';
 import { restaurantAPI } from '../../api';
 
 export default function StudentHomePage() {
@@ -16,9 +16,7 @@ export default function StudentHomePage() {
   const [openNow, setOpenNow] = useState(false);
   const [rating, setRating] = useState(null);
 
-  useEffect(() => {
-    loadRestaurants();
-  }, []);
+  useEffect(() => { loadRestaurants(); }, []);
 
   const loadRestaurants = async () => {
     try {
@@ -33,106 +31,53 @@ export default function StudentHomePage() {
     }
   };
 
-  const categories = ['Sénégalais', 'Rapide', 'Pizzas', 'Sandwichs', 'Boissons'];
-  const deliveryFilters = [20, 30, 45];
-  const ratingFilters = [4, 4.5];
+  const categories = ['Sénégalais', 'Rapide', 'Pizzas', 'Boissons'];
+  const anyFilter = category || deliveryTime || openNow || rating;
 
-  const filteredRestaurants = restaurants.filter((r) => {
+  const filtered = restaurants.filter((r) => {
     const text = `${r.name || ''} ${r.description || ''}`.toLowerCase();
-    const matchesSearch = text.includes(searchQuery.toLowerCase());
-    const matchesCategory = !category || text.includes(category.toLowerCase());
-    const matchesTime = !deliveryTime || Number(r.delivery_time || 999) < deliveryTime;
-    const matchesOpen = !openNow || r.is_open;
-    const matchesRating = !rating || Number(r.rating || 0) >= rating;
-
-    return matchesSearch && matchesCategory && matchesTime && matchesOpen && matchesRating;
+    return text.includes(searchQuery.toLowerCase())
+      && (!category || text.includes(category.toLowerCase()))
+      && (!deliveryTime || Number(r.delivery_time || 999) < deliveryTime)
+      && (!openNow || r.is_open)
+      && (!rating || Number(r.rating || 0) >= rating);
   });
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto p-4 md:p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Bienvenue sur Yoonema 🍽️</h1>
-          <p className="text-gray-600">Découvrez les meilleurs restaurants de votre université</p>
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '18px 16px 28px' }}>
+        {/* Search */}
+        <div className="search">
+          <Icon name="search" size={18} style={{ color: 'var(--ink-3)' }} />
+          <input placeholder="Rechercher un resto ou un plat…" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
         </div>
 
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          <Input
-            placeholder="Rechercher un restaurant..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <button
-              onClick={() => {
-                setCategory(null);
-                setDeliveryTime(null);
-                setOpenNow(false);
-                setRating(null);
-              }}
-              className="px-4 py-2 rounded-full bg-orange-500 text-white whitespace-nowrap"
-            >
-              Tous
-            </button>
-            {categories.map((item) => (
-              <button
-                key={item}
-                onClick={() => setCategory(category === item ? null : item)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap ${category === item ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              >
-                {item}
-              </button>
-            ))}
-            {deliveryFilters.map((item) => (
-              <button
-                key={item}
-                onClick={() => setDeliveryTime(deliveryTime === item ? null : item)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap ${deliveryTime === item ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              >
-                &lt; {item} min
-              </button>
-            ))}
-            <button
-              onClick={() => setOpenNow(!openNow)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap ${openNow ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-            >
-              Ouvert maintenant
-            </button>
-            {ratingFilters.map((item) => (
-              <button
-                key={item}
-                onClick={() => setRating(rating === item ? null : item)}
-                className={`px-4 py-2 rounded-full whitespace-nowrap ${rating === item ? 'bg-orange-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-              >
-                {item}+ étoiles
-              </button>
-            ))}
-          </div>
+        {/* Filters */}
+        <div className="scroll-x" style={{ display: 'flex', gap: 9, padding: '14px 0 6px' }}>
+          <Chip on={!anyFilter} onClick={() => { setCategory(null); setDeliveryTime(null); setOpenNow(false); setRating(null); }}>Tous</Chip>
+          {categories.map((c) => <Chip key={c} on={category === c} onClick={() => setCategory(category === c ? null : c)}>{c}</Chip>)}
+          <Chip on={deliveryTime === 20} onClick={() => setDeliveryTime(deliveryTime === 20 ? null : 20)}>&lt; 20 min</Chip>
+          <Chip on={rating === 4} onClick={() => setRating(rating === 4 ? null : 4)}>4+ ★</Chip>
+          <Chip on={openNow} onClick={() => setOpenNow(!openNow)}>Ouvert</Chip>
         </div>
 
-        {/* Restaurants Grid */}
+        {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 13, marginTop: 6 }}>
+            {[...Array(6)].map((_, i) => <div key={i} className="card" style={{ height: 230 }} />)}
           </div>
-        ) : filteredRestaurants.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-2xl mb-2">😢 Aucun restaurant trouvé</p>
-            <p className="text-gray-600">Essayez une autre recherche</p>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '64px 16px', color: 'var(--ink-2)' }}>
+            <div style={{ width: 64, height: 64, borderRadius: 18, display: 'grid', placeItems: 'center', background: 'var(--terra-tint)', color: 'var(--terra)', margin: '0 auto 14px' }}>
+              <Icon name="search" size={26} />
+            </div>
+            <p style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>Aucun restaurant trouvé</p>
+            <p style={{ fontSize: 14, marginTop: 4 }}>Essaie un autre mot-clé ou retire des filtres.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRestaurants.map((restaurant) => (
-              <RestaurantCard
-                key={restaurant.id}
-                restaurant={restaurant}
-                onClick={() => navigate(`/restaurants/${restaurant.id}`)}
-              />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 13, marginTop: 6 }}>
+            {filtered.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} onClick={() => navigate(`/restaurants/${r.id}`)} />
             ))}
           </div>
         )}

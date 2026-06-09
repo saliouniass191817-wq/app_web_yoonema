@@ -1,69 +1,85 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { Button } from '../ui/Button';
+import { Icon } from '../ui/Icon';
+
+const NAV = {
+  student: [
+    { label: 'Accueil', icon: 'home', path: '/home' },
+    { label: 'Mes commandes', icon: 'bag', path: '/orders' },
+    { label: 'Notifications', icon: 'bell', path: '/notifications' },
+    { label: 'Profil', icon: 'user', path: '/profile' },
+  ],
+  vendor: [
+    { label: 'Tableau de bord', icon: 'grid', path: '/vendor' },
+    { label: 'Mes commandes', icon: 'utensils', path: '/vendor/orders' },
+    { label: 'Menu', icon: 'list', path: '/vendor/menu' },
+    { label: 'Statistiques', icon: 'chart', path: '/vendor/stats' },
+    { label: 'Profil', icon: 'user', path: '/vendor/profile' },
+  ],
+  delivery: [
+    { label: 'Accueil', icon: 'home', path: '/delivery' },
+    { label: 'Historique', icon: 'receipt', path: '/delivery/history' },
+    { label: 'Profil', icon: 'user', path: '/delivery/profile' },
+  ],
+  admin: [
+    { label: 'Tableau de bord', icon: 'grid', path: '/admin' },
+    { label: 'Restaurants', icon: 'store', path: '/admin/restaurants' },
+    { label: 'Utilisateurs', icon: 'users', path: '/admin/users' },
+    { label: 'Commandes', icon: 'bag', path: '/admin/orders' },
+    { label: 'Livreurs', icon: 'bike', path: '/admin/delivery' },
+  ],
+};
+
+const ROLE_ROOTS = ['/home', '/vendor', '/delivery', '/admin'];
+const ROLE_LABELS = { student: 'Étudiant', vendor: 'Vendeur', delivery: 'Livreur', admin: 'Admin' };
 
 export function Sidebar() {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { user, role, logout } = useAuth();
+  const items = NAV[role] || [];
 
-  const navItems = {
-    student: [
-      { label: 'Accueil', icon: '🏠', path: '/home' },
-      { label: 'Mes commandes', icon: '📦', path: '/orders' },
-      { label: 'Notifications', icon: '🔔', path: '/notifications' },
-      { label: 'Profil', icon: '👤', path: '/profile' },
-    ],
-    vendor: [
-      { label: 'Tableau de bord', icon: '📊', path: '/vendor' },
-      { label: 'Mes commandes', icon: '🍽️', path: '/vendor/orders' },
-      { label: 'Menu', icon: '📋', path: '/vendor/menu' },
-      { label: 'Statistiques', icon: '📈', path: '/vendor/stats' },
-      { label: 'Profil', icon: '👤', path: '/vendor/profile' },
-    ],
-    delivery: [
-      { label: 'Accueil', icon: '🏠', path: '/delivery' },
-      { label: 'Historique', icon: '📜', path: '/delivery/history' },
-      { label: 'Profil', icon: '👤', path: '/delivery/profile' },
-    ],
-    admin: [
-      { label: 'Tableau de bord', icon: '📊', path: '/admin' },
-      { label: 'Restaurants', icon: '🍴', path: '/admin/restaurants' },
-      { label: 'Utilisateurs', icon: '👥', path: '/admin/users' },
-      { label: 'Commandes', icon: '📦', path: '/admin/orders' },
-      { label: 'Livreurs', icon: '🚴', path: '/admin/delivery' },
-    ],
-  };
-
-  const items = navItems[role] || [];
+  const isActive = (path) =>
+    pathname === path || (!ROLE_ROOTS.includes(path) && pathname.startsWith(path + '/'));
 
   return (
-    <div className="flex flex-col h-full p-6 overflow-y-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-orange-500">Yoonema</h1>
-        <p className="text-sm text-gray-600 mt-1">{user?.name}</p>
+    <div className="side" style={{ height: '100%' }}>
+      <div className="side-logo">
+        <span className="mark"><Icon name="utensils" size={20} /></span>
+        <b>Yoonema</b>
       </div>
 
-      <nav className="flex-1 space-y-2">
-        {items.map((item) => (
-          <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 font-medium"
-          >
-            <span className="mr-2">{item.icon}</span>
-            {item.label}
-          </button>
-        ))}
+      <div className="side-label">Menu</div>
+      <nav className="side-nav">
+        {items.map((item) => {
+          const active = isActive(item.path);
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className={`side-item ${active ? 'on' : ''}`}
+              aria-current={active ? 'page' : undefined}
+            >
+              <Icon name={item.icon} size={19} stroke={active ? 2.2 : 1.9} />
+              {item.label}
+            </button>
+          );
+        })}
       </nav>
 
-      <Button
-        onClick={logout}
-        variant="outline"
-        className="w-full"
-      >
-        Déconnexion
-      </Button>
+      <div className="side-user">
+        <span className="ava">{(user?.name || '?').charAt(0)}</span>
+        <div className="meta">
+          <b>{user?.name || 'Utilisateur'}</b>
+          <small>{ROLE_LABELS[role] || ''}</small>
+        </div>
+        <button className="out" onClick={logout} aria-label="Déconnexion" title="Déconnexion">
+          <Icon name="power" size={18} />
+        </button>
+      </div>
     </div>
   );
 }
+
+export default Sidebar;

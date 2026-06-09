@@ -1,47 +1,35 @@
 import React from 'react';
-import { Card } from '../ui/Card';
-import { Badge } from '../ui/Badge';
-import { formatCurrency } from '../../lib/utils';
+import { Icon } from '../ui/Icon';
+import { FoodTile } from '../ui/FoodTile';
+import { fcfa } from '../../lib/utils';
 
 export function RestaurantCard({ restaurant, onClick }) {
+  const open = restaurant.is_open;
+  const fee = Number(restaurant.delivery_fee || 0);
+
   return (
-    <Card
-      onClick={onClick}
-      className="overflow-hidden cursor-pointer hover:shadow-lg transition-all"
-    >
-      <div className="relative">
-        <img
-          src={restaurant.image_url || '/images/placeholder-food.jpg'}
-          alt={restaurant.name}
-          className="w-full h-40 object-cover"
-        />
-        {!restaurant.is_open && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="text-white font-semibold">Fermé</span>
-          </div>
-        )}
+    <div className="card rcard" style={{ cursor: 'pointer' }} onClick={onClick}>
+      <div style={{ position: 'relative' }}>
+        <FoodTile src={restaurant.image_url} seed={restaurant.name} cap={restaurant.cuisine} />
+        <span className={`pill-status ${open ? 'pill-open' : 'pill-closed'}`}>
+          <span className="dot" />
+          {open ? 'Ouvert' : 'Fermé'}
+        </span>
+        <span className="pill-rating">
+          <Icon name="star" size={12} style={{ color: 'var(--gold)' }} />
+          {Number(restaurant.rating || 4.5).toFixed(1)}
+        </span>
       </div>
-
-      <div className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{restaurant.name}</h3>
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {restaurant.description}
-        </p>
-
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-yellow-500">★</span>
-            <span className="font-semibold">{restaurant.rating || 4.5}</span>
-          </div>
-          <Badge variant="orange">
-            {restaurant.delivery_time} min
-          </Badge>
+      <div className="rcard-body">
+        <h3 className="rcard-name">{restaurant.name}</h3>
+        <p className="rcard-desc">{restaurant.description}</p>
+        <div className="rcard-meta">
+          <span className="mi"><Icon name="clock" size={14} style={{ color: 'var(--ink-3)' }} />{restaurant.delivery_time} min</span>
+          <span className="mi"><Icon name="bike" size={14} style={{ color: 'var(--ink-3)' }} />{fee === 0 ? 'Gratuit' : fcfa(fee)}</span>
         </div>
-
-        <p className="text-gray-600 text-sm">
-          Frais: {formatCurrency(restaurant.delivery_fee)}
-        </p>
       </div>
-    </Card>
+    </div>
   );
 }
+
+export default RestaurantCard;

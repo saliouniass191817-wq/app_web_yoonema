@@ -10,34 +10,29 @@ export function AppLayout({ children }) {
   const { notifications, removeNotification } = useNotifications();
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 border-r border-gray-200">
+    <div className="flex h-screen" style={{ background: 'transparent' }}>
+      {/* Desktop sidebar (espresso) */}
+      <aside className="hidden md:block" style={{ width: 240, flex: 'none' }}>
         <Sidebar />
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Top Bar */}
+      {/* Main column */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopBar />
-
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto pb-24 md:pb-6">
+        <main className="flex-1 overflow-y-auto" style={{ paddingBottom: 96 }}>
           {children}
         </main>
 
-        {/* Mobile Bottom Nav */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        {/* Mobile bottom nav */}
+        <div className="md:hidden" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50 }}>
           <BottomNav />
         </div>
       </div>
 
-      {/* Toast Notifications */}
-      <ToastContainer
-        toasts={notifications}
-        removeToast={removeNotification}
-      />
+      <ToastContainer toasts={notifications} removeToast={removeNotification} />
       <CartFloatingButton />
     </div>
   );
 }
+
+export default AppLayout;

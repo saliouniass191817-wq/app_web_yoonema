@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../../components/layout/AppLayout';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { Icon } from '../../components/ui/Icon';
 import { Card, CardBody } from '../../components/ui/Card';
 import { useCart } from '../../hooks/useCart';
 import { useCartStore } from '../../store';
@@ -20,6 +21,7 @@ export default function CartPage() {
   const [selectedDeliveryPerson, setSelectedDeliveryPerson] = useState(null);
   const [createdOrder, setCreatedOrder] = useState(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
+  const inFlightRef = useRef(false);
 
   // `total` is provided by the `useCart` hook
   const deliveryFee = items.reduce((sum, item) => sum + (Number(item.quantity) || 1) * 200, 0);
@@ -30,7 +32,9 @@ export default function CartPage() {
       error('Veuillez entrer une adresse de livraison');
       return;
     }
-
+    // prevent duplicate submissions (double-clicks or rapid repeats)
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setLoading(true);
     try {
       const response = await orderAPI.create({
@@ -56,6 +60,7 @@ export default function CartPage() {
       error(err.message || 'Erreur lors de la commande');
     } finally {
       setLoading(false);
+      inFlightRef.current = false;
     }
   };
 
@@ -80,11 +85,14 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <AppLayout>
-        <div className="max-w-4xl mx-auto p-4 md:p-6 text-center py-12">
-          <p className="text-3xl mb-4">🛒</p>
-          <p className="text-2xl font-semibold mb-4">Votre panier est vide</p>
-          <Button onClick={() => navigate('/home')}>
-            Continuer les achats
+        <div className="mx-auto flex max-w-md flex-col items-center justify-center px-4 py-20 text-center">
+          <span className="grid h-16 w-16 place-items-center rounded-2xl bg-orange-50 text-orange-500">
+            <Icon name="bag" size={30} />
+          </span>
+          <p className="mt-5 text-xl font-bold text-gray-900">Ton panier est vide</p>
+          <p className="mt-1 text-gray-500">Ajoute des plats depuis un restaurant pour commander.</p>
+          <Button onClick={() => navigate('/home')} className="mt-6">
+            Découvrir les restaurants
           </Button>
         </div>
       </AppLayout>
@@ -93,76 +101,93 @@ export default function CartPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto p-4 md:p-6">
-        <h1 className="text-3xl font-bold mb-8">Panier</h1>
+      <div className="mx-auto max-w-5xl p-4 md:p-6 lg:p-8">
+        <h1 className="mb-6 text-2xl font-extrabold tracking-tight text-gray-900 md:text-3xl">Mon panier</h1>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-3">
           {/* Items */}
-          <div className="md:col-span-2 space-y-4">
+          <div className="space-y-3 md:col-span-2">
             {items.map((item) => (
-              <Card key={item.id}>
-                <CardBody className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{item.name}</h3>
-                    <p className="text-gray-600">{formatCurrency(item.price)} x {item.quantity}</p>
+              <Card key={item.id} className="p-4">
+                <div className="flex items-center gap-4">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-semibold text-gray-900">{item.name}</h3>
+                    <p className="mt-0.5 text-sm text-gray-500">{formatCurrency(item.price)} / unité</p>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <p className="font-semibold">{formatCurrency(item.price * item.quantity)}</p>
+
+                  <div className="inline-flex items-center rounded-xl border border-gray-200 bg-gray-50">
                     <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-700"
+                      onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                      className="grid h-8 w-8 place-items-center rounded-l-xl text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-40"
+                      disabled={item.quantity <= 1}
+                      aria-label="Diminuer"
                     >
-                      ✕
+                      <Icon name="minus" size={15} />
+                    </button>
+                    <span className="w-7 text-center text-sm font-bold tabular-nums">{item.quantity}</span>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="grid h-8 w-8 place-items-center rounded-r-xl text-gray-600 transition-colors hover:bg-gray-100"
+                      aria-label="Augmenter"
+                    >
+                      <Icon name="plus" size={15} />
                     </button>
                   </div>
-                </CardBody>
+
+                  <p className="w-24 text-right font-bold text-gray-900">{formatCurrency(item.price * item.quantity)}</p>
+
+                  <button
+                    onClick={() => removeItem(item.id)}
+                    className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-danger-50 hover:text-danger-600"
+                    aria-label="Retirer"
+                  >
+                    <Icon name="x" size={16} />
+                  </button>
+                </div>
               </Card>
             ))}
+
+            <button
+              onClick={() => navigate('/home')}
+              className="inline-flex items-center gap-1.5 px-1 text-sm font-medium text-orange-600 hover:text-orange-700"
+            >
+              <Icon name="plus" size={16} />
+              Ajouter d’autres plats
+            </button>
           </div>
 
           {/* Summary */}
           <div className="md:col-span-1">
-            <Card>
+            <Card className="md:sticky md:top-24">
               <CardBody className="space-y-4">
-                <h2 className="font-semibold text-lg">Résumé</h2>
+                <h2 className="text-lg font-bold text-gray-900">Résumé</h2>
 
-                <div className="space-y-2 pb-4 border-b border-gray-200">
-                  <div className="flex justify-between">
+                <div className="space-y-2 border-b border-gray-200/70 pb-4 text-sm">
+                  <div className="flex justify-between text-gray-600">
                     <span>Sous-total</span>
-                    <span>{formatCurrency(total)}</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(total)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-gray-600">
                     <span>Frais de livraison</span>
-                    <span>{formatCurrency(deliveryFee)}</span>
+                    <span className="font-medium text-gray-900">{formatCurrency(deliveryFee)}</span>
                   </div>
                 </div>
 
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span className="text-orange-500">{formatCurrency(finalTotal)}</span>
+                <div className="flex items-baseline justify-between">
+                  <span className="font-semibold text-gray-900">Total</span>
+                  <span className="text-xl font-extrabold text-orange-600">{formatCurrency(finalTotal)}</span>
                 </div>
 
                 <Input
                   label="Adresse de livraison"
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
-                  placeholder="Rue, bâtiment, numéro..."
+                  placeholder="Village H, chambre 12…"
+                  icon={<Icon name="mapPin" size={18} />}
                 />
 
-                <Button
-                  onClick={handleSubmitOrder}
-                  loading={loading}
-                  className="w-full"
-                >
+                <Button onClick={handleSubmitOrder} loading={loading} size="lg" className="w-full">
                   Confirmer et payer
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={() => navigate('/home')}
-                  className="w-full"
-                >
-                  Continuer les achats
                 </Button>
               </CardBody>
             </Card>

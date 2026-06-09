@@ -23,9 +23,11 @@ class VendorOrderController extends Controller
         }
 
         $orders = Order::query()
+            ->with(['deliveryPerson'])
             ->where('restaurant_id', $restaurant->id)
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
             ->orderByDesc('created_at')
+            ->limit((int) config('yoonema.list_limit', 200))
             ->get();
 
         return response()->json(['success' => true, 'data' => OrderResource::collection($orders), 'message' => 'Commandes du restaurant récupérées.']);
