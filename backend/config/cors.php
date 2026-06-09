@@ -3,20 +3,20 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+        'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_values(array_filter(array_map(
-        'trim',
-        explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://192.168.56.1:5173'))
-    ))),
+            'allowed_origins' => array_values(array_filter(array_map(
+                    'trim',
+                            explode(',', (string) env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173,http://192.168.56.1:5173,https://app-web-yoonema.vercel.app'))
+                                ))),
 
-    'allowed_origins_patterns' => [],
+                                    'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+                                        'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+                                            'exposed_headers' => [],
 
-    'max_age' => 0,
+                                                'max_age' => 0,
 
-    'supports_credentials' => true,
-];
+                                                    'supports_credentials' => true,
+                                                    ];
