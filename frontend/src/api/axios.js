@@ -29,7 +29,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('yoonema_token');
-      localStorage.removeItem('yoonema_user');
+      localStorage.removeItem('yoonema_auth');
       window.location.href = '/login';
     }
 
