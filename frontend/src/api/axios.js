@@ -13,9 +13,23 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    // If this request contains a FormData payload, remove any preset
+    // Content-Type header so the browser can set the multipart boundary.
+    try {
+      if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+        if (config.headers) {
+          delete config.headers['Content-Type'];
+          delete config.headers['content-type'];
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
     const token = localStorage.getItem('yoonema_token');
 
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
 

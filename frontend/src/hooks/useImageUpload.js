@@ -49,9 +49,7 @@ export function useImageUpload() {
       const resized = await resizeImage(file);
       const formData = new FormData();
       formData.append('image', resized);
-      const response = await api.post('/upload/image', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const response = await api.post('/upload/image', formData);
       return response.data?.url;
     } catch (err) {
       const message = err?.message || 'Téléversement impossible.';
